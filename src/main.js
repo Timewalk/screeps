@@ -1,32 +1,30 @@
-const creeps = require('conf.creeps');
-const utils = require('utils');
-require('spawn');
-require('creep');
+const util = require('util');
+const conf = require('conf');
+require('spawn.prototype');
+require('creep.prototype');
 
 module.exports.loop = function () {
-    utils.refreshCache();
-
-    // Build structures for each room based on room-specific configurations
-    for (let roomName in Game.rooms) {
-        let room = Game.rooms[roomName];
-        if (room.controller && room.controller.my) {
-            try {
-                let roomConfig = require(`conf.shard3.${roomName}`);
-                utils.buildStructures(roomConfig);
-            } catch (e) {
-                continue; // Room configuration file doesn't exist, skip
+    util.cacheAllRooms();
+    Memory.debugCache = JSON.stringify(global.cache);
+    
+    // Spawn creeps from config
+    for (let creepConfig of conf.creeps) {
+        if (!Game.creeps[creepConfig.name]) {
+            let spawn = Game.spawns[creepConfig.spawn];
+            if (spawn && !spawn.spawning) {
+                let result = spawn.spawnCreepFromConfig(creepConfig);
+                if (result === OK) {
+                    console.log('Spawning creep:', creepConfig.name);
+                }
             }
         }
     }
-
-    for (let spawnName in Game.spawns) {
-        Game.spawns[spawnName].spawnCreeps(creeps);
+    
+    // Update all creeps
+    for (let name in Game.creeps) {
+        let creep = Game.creeps[name];
+        creep.update();
     }
-
-    for (let conf of creeps) {
-        let creep = Game.creeps[conf.name];
-        if (!creep) continue;
-
-        creep.update(conf);
-    }
-}
+    
+    console.log('Heartbeat - Tick:', Game.time);
+};

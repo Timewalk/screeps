@@ -1,45 +1,56 @@
-# Screeps AI Bot
+# CLAUDE.md
 
-## Overview
-Configuration-driven Screeps AI bot with CPU-efficient caching system.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Repository Overview
+
+This is a Screeps AI bot repository located in the Screeps client's scripts directory. Screeps is a MMO RTS game for programmers where you control your colony by writing JavaScript code.
 
 ## Architecture
-- **main.js**: Main game loop with spawn management
-- **conf.js**: Pure data configuration for creeps, spawns, and roles
-- **utils.js**: Utility functions for caching and body calculations
 
-## Key Features
-- Global object caching system for CPU efficiency
-- Dynamic body scaling based on room energy capacity
-- Position-based configuration using [room, x, y] arrays
-- Configuration-driven creep spawning
+- **main.js**: Entry point for the Screeps AI bot (currently empty)
+- This appears to be a fresh Screeps bot project named "claude_bot2"
 
-## Files
-- `main.js` - Main loop, spawn iteration, creep spawning
-- `conf.js` - Creep configurations (name, role, spawn location, source, parking, bodyTemplate)
-- `utils.js` - Cache management, object lookups, body calculations
+## Development Context
 
-## Current Creeps
-- **Henry**: Harvester at spawn [sim, 22, 24], source [sim, 35, 20], parking [sim, 34, 21]
+- **Platform**: Screeps game environment
+- **Language**: JavaScript (ES6+ supported by Screeps engine)
+- **Execution**: Code runs in the Screeps game world, managing creeps (units), rooms, and resources
+- **File Structure**: Screeps uses a flat file structure where all .js files are automatically loaded
 
-## System Design Specifications
+## Design Approach
 
-### UNIX Design Principles
-- **Do One Thing Well**: Each function has a single, clear purpose
-- **Fail Fast**: No defensive programming - expect correct input, fail immediately on bad data
-- **Small and Simple**: Minimal, focused modules that compose together
-- **Trust the Configuration**: `conf.js` parameters assumed to be correct and well-formed
+This bot uses a **completely config-based approach** for creep behavior. Creeps are controlled through instruction arrays rather than hardcoded logic.
 
-### Data Validation Strategy
-- **Trust Internal Data**: Configuration data assumed valid, no safety checks
-- **Validate External Data**: Game objects validated before function calls
-- **Fail Loudly**: Let errors bubble up rather than masking them
-- **Caller Responsibility**: Functions expect valid input, callers must validate Game data
+### Instruction Format
+```javascript
+creep.instructions = [
+    {'moveTo()', ['sim', 20, 21]},
+    {'harvest()', 'source', ['sim', 21, 21]}
+]
+```
 
-### Tool Philosophy
-- **Functions Are Tools**: Like a hammer, functions should work when used correctly
-- **No Defensive Programming**: Don't wrap functions in validation layers and safety checks
-- **Sharp Tools**: Fast, predictable behavior when used properly - crashes are user error
-- **Single Validation Point**: Validate once at the boundary, not scattered throughout
-- **Trust the User**: Don't protect users from themselves with "helpful" safeguards
-- **Keep Functions Pure**: Focus on core purpose, not input sanitization
+This allows for:
+- Dynamic behavior modification without code changes
+- Easy AI configuration through data structures
+- Separation of logic from behavior definitions
+
+## Screeps-Specific Notes
+
+- The main.js file serves as the entry point and is executed every game tick
+- Screeps provides global objects like Game, Memory, and console for interacting with the game world
+- Code is deployed directly to the Screeps servers via the client or API
+- No traditional build process - JavaScript files are uploaded directly to the game
+
+## Common Development Pattern
+
+Since this is a Screeps bot, development typically involves:
+1. Writing AI logic in main.js or additional modules
+2. Testing in the Screeps simulation environment
+3. Deploying to live servers through the Screeps client
+
+## Memory and Performance
+
+- Screeps has CPU limits per tick, so code efficiency is crucial
+- Use Memory object for persistent data between ticks
+- Avoid expensive operations in tight loops
