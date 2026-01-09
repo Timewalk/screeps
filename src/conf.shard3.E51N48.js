@@ -1,0 +1,57 @@
+const ROOM_NAME = 'E51N48';
+
+
+module.exports = [
+    {type: 'source', rcl: 0, gcl: 0, roomName: ROOM_NAME, x: 18, y: 22},
+    {type: 'source', rcl: 0, gcl: 0, roomName: ROOM_NAME, x: 43, y: 38},
+
+    {type: STRUCTURE_CONTROLLER, rcl: 1, gcl: 0, roomName: ROOM_NAME, x: 15, y: 21},
+
+    {type: STRUCTURE_SPAWN, rcl: 1, gcl: 0, roomName: ROOM_NAME, x: 17, y: 28},
+    
+    {type: STRUCTURE_CONTAINER, rcl: 1, gcl: 0, roomName: ROOM_NAME, x: 13, y: 21},
+    
+    {type: STRUCTURE_EXTENSION, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 10, y: 21},
+    {type: STRUCTURE_EXTENSION, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 10, y: 22},
+    {type: STRUCTURE_EXTENSION, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 10, y: 23},
+    {type: STRUCTURE_EXTENSION, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 10, y: 24},
+    {type: STRUCTURE_EXTENSION, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 10, y: 20},
+
+    {type: STRUCTURE_ROAD, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 18, y: 28},
+    {type: STRUCTURE_ROAD, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 19, y: 28},
+    {type: STRUCTURE_ROAD, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 20, y: 28},
+    {type: STRUCTURE_ROAD, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 21, y: 28},
+    {type: STRUCTURE_ROAD, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 22, y: 28},
+    {type: STRUCTURE_ROAD, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 23, y: 28},
+    {type: STRUCTURE_ROAD, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 24, y: 28},
+    {type: STRUCTURE_ROAD, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 25, y: 28},
+    {type: STRUCTURE_ROAD, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 26, y: 28},
+    {type: STRUCTURE_ROAD, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 27, y: 28},
+    {type: STRUCTURE_ROAD, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 28, y: 28},
+    {type: STRUCTURE_ROAD, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 29, y: 28},
+    {type: STRUCTURE_ROAD, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 30, y: 28},
+    {type: STRUCTURE_ROAD, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 31, y: 29},
+    {type: STRUCTURE_ROAD, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 18, y: 27},
+    {type: STRUCTURE_ROAD, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 17, y: 27},
+    {type: STRUCTURE_ROAD, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 16, y: 27},
+    {type: STRUCTURE_ROAD, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 16, y: 28},
+    {type: STRUCTURE_ROAD, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 17, y: 29},
+    {type: STRUCTURE_ROAD, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 18, y: 29},
+    {type: STRUCTURE_ROAD, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 16, y: 29},
+    {type: STRUCTURE_ROAD, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 18, y: 23},
+    {type: STRUCTURE_ROAD, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 17, y: 23},
+    {type: STRUCTURE_ROAD, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 16, y: 23},
+    {type: STRUCTURE_ROAD, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 15, y: 23},
+    {type: STRUCTURE_ROAD, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 14, y: 22},
+    {type: STRUCTURE_ROAD, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 13, y: 22},
+    {type: STRUCTURE_ROAD, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 12, y: 22},
+    {type: STRUCTURE_ROAD, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 11, y: 20},
+    {type: STRUCTURE_ROAD, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 11, y: 21},
+    {type: STRUCTURE_ROAD, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 11, y: 22},
+    {type: STRUCTURE_ROAD, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 11, y: 23},
+    {type: STRUCTURE_ROAD, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 11, y: 24},
+    {type: STRUCTURE_ROAD, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 12, y: 25},
+    {type: STRUCTURE_ROAD, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 13, y: 26},
+    {type: STRUCTURE_ROAD, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 14, y: 27},
+    {type: STRUCTURE_ROAD, rcl: 2, gcl: 0, roomName: ROOM_NAME, x: 15, y: 28},
+];

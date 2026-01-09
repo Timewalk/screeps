@@ -1,0 +1,19 @@
+{
+  "name": "screeps-bot",
+  "version": "1.0.0",
+  "description": "Screeps AI bot",
+  "main": "Gruntfile.js",
+  "scripts": {
+    "deploy": "grunt",
+    "deploy:ptr": "grunt --ptr=true",
+    "test": "grunt test"
+  },
+  "devDependencies": {
+    "grunt": "^1.6.1",
+    "grunt-screeps": "^2.1.0",
+    "grunt-contrib-clean": "^2.0.1",
+    "grunt-contrib-copy": "^1.0.0",
+    "grunt-file-append": "0.0.7",
+    "time-grunt": "^2.0.0"
+  }
+}
