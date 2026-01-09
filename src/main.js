@@ -1,9 +1,11 @@
-/*
- * ClaudeBot - Screeps AI
- * Fresh start - reference ClaudeBotOld branch for patterns
- */
+const Hugo = require('hugo');
+const Tucker = require('tucker');
+const Hank = require('hank');
+const Tina = require('tina');
 
 module.exports.loop = function() {
-    // Main game loop runs every tick
-
+    Hugo.run();
+    Tucker.run();
+    Hank.run();
+    Tina.run();
 }
