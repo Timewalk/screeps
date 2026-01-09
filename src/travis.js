@@ -23,21 +23,21 @@ const conf = {
 // Same routine as Tucker - shared constant would be cleaner but this works
 const routine = [
     // Outbound: spawn area -> controller area
-    { pos: { x: 14, y: 16 }, dir: RIGHT, actions: ['pickupSam'] },
+    { pos: { x: 14, y: 16 }, dir: RIGHT, actions: ['pickupSam', 'transferBob'] },
     { pos: { x: 15, y: 16 }, dir: RIGHT },
     { pos: { x: 16, y: 16 }, dir: RIGHT },
     { pos: { x: 17, y: 16 }, dir: TOP_RIGHT },
     { pos: { x: 18, y: 15 }, dir: TOP_RIGHT },
-    { pos: { x: 19, y: 14 }, dir: TOP_RIGHT },
+    { pos: { x: 19, y: 14 }, dir: TOP_RIGHT, actions: ['transferBob'] },
     { pos: { x: 20, y: 13 }, dir: TOP_RIGHT },
     { pos: { x: 21, y: 12 }, dir: TOP_RIGHT },
     { pos: { x: 22, y: 11 }, dir: TOP_RIGHT },
-    { pos: { x: 23, y: 10 }, dir: TOP_RIGHT },
+    { pos: { x: 23, y: 10 }, dir: TOP_RIGHT, actions: ['transferBob'] },
     { pos: { x: 24, y: 9 }, dir: RIGHT },
     { pos: { x: 25, y: 9 }, dir: TOP, actions: ['pickupHugo'] },
     { pos: { x: 25, y: 8 }, dir: TOP_LEFT },
     { pos: { x: 24, y: 7 }, dir: TOP_LEFT },                          // Step 13 - halfway
-    { pos: { x: 23, y: 6 }, dir: BOTTOM_RIGHT, actions: ['transferUma'] },
+    { pos: { x: 23, y: 6 }, dir: BOTTOM_RIGHT, actions: ['transferUma', 'transferBob'] },
 
     // Return: back to spawn
     { pos: { x: 24, y: 7 }, dir: BOTTOM_RIGHT },
@@ -74,7 +74,14 @@ const actions = {
     transferUma(creep) {
         if (!creep.notEmpty) return;
         const uma = Game.creeps['Uma'];
-        if (uma) return creep.transfer(uma, RESOURCE_ENERGY);
+        if (uma && uma.notFull) return creep.transfer(uma, RESOURCE_ENERGY);
+    },
+    transferBob(creep) {
+        if (!creep.notEmpty) return;
+        const bob = Game.creeps['Bob'];
+        if (bob && bob.notFull && creep.pos.isNearTo(bob)) {
+            return creep.transfer(bob, RESOURCE_ENERGY);
+        }
     },
 };
 

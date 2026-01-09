@@ -4,6 +4,7 @@ const Hugo = require('hugo');
 const Tucker = require('tucker');
 const Travis = require('travis');
 const Uma = require('uma');
+const Bob = require('bob');
 
 module.exports.loop = function() {
     // Clean up dead creep memory
@@ -17,6 +18,7 @@ module.exports.loop = function() {
     Sam.run();
     Hugo.run();
     Tucker.run();
-    Travis.run();  // Spawns when Tucker is at halfway point
+    Travis.run();
     Uma.run();
+    Bob.run();  // Builder - only spawns if construction sites exist
 };
