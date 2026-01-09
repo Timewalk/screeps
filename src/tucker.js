@@ -24,36 +24,36 @@ const conf = {
 // Tucker's route - full road round trip
 const routine = [
     // Outbound: spawn area -> controller area
-    { pos: { x: 14, y: 16 }, dir: RIGHT, actions: ['pickupSam', 'transferBob'] },  // Sam drops at (13,15), Bob at (14,17)
+    { pos: { x: 14, y: 16 }, dir: RIGHT, actions: ['pickupSam'] },
     { pos: { x: 15, y: 16 }, dir: RIGHT },
     { pos: { x: 16, y: 16 }, dir: RIGHT },
-    { pos: { x: 17, y: 16 }, dir: TOP_RIGHT },
+    { pos: { x: 17, y: 16 }, dir: TOP_RIGHT, actions: ['transferBob'] },  // Bob at (17,15)
     { pos: { x: 18, y: 15 }, dir: TOP_RIGHT },
-    { pos: { x: 19, y: 14 }, dir: TOP_RIGHT, actions: ['transferBob'] },  // Bob at (19,13)
+    { pos: { x: 19, y: 14 }, dir: TOP_RIGHT },
     { pos: { x: 20, y: 13 }, dir: TOP_RIGHT },
     { pos: { x: 21, y: 12 }, dir: TOP_RIGHT },
-    { pos: { x: 22, y: 11 }, dir: TOP_RIGHT },
-    { pos: { x: 23, y: 10 }, dir: TOP_RIGHT, actions: ['transferBob'] },  // Bob at (23,9)
-    { pos: { x: 24, y: 9 }, dir: RIGHT },
-    { pos: { x: 25, y: 9 }, dir: TOP, actions: ['pickupHugo'] },  // Hugo drops at (26,9)
+    { pos: { x: 22, y: 11 }, dir: TOP_RIGHT, actions: ['transferBob'] },  // Bob at (22,12)
+    { pos: { x: 23, y: 10 }, dir: TOP_RIGHT },
+    { pos: { x: 24, y: 9 }, dir: RIGHT, actions: ['transferBob'] },  // Bob at (24,8)
+    { pos: { x: 25, y: 9 }, dir: TOP, actions: ['pickupHugo'] },
     { pos: { x: 25, y: 8 }, dir: TOP_LEFT },
     { pos: { x: 24, y: 7 }, dir: TOP_LEFT },
-    { pos: { x: 23, y: 6 }, dir: BOTTOM_RIGHT, actions: ['transferUma', 'transferBob'] },  // Uma at (24,5), Bob at (22,5)
+    { pos: { x: 23, y: 6 }, dir: BOTTOM_RIGHT, actions: ['transferUma'] },
 
     // Return: back to spawn
     { pos: { x: 24, y: 7 }, dir: BOTTOM_RIGHT },
     { pos: { x: 25, y: 8 }, dir: BOTTOM },
-    { pos: { x: 25, y: 9 }, dir: LEFT, actions: ['pickupHugo'] },  // Pickup again on way back
-    { pos: { x: 24, y: 9 }, dir: BOTTOM_LEFT },
+    { pos: { x: 25, y: 9 }, dir: LEFT, actions: ['pickupHugo'] },
+    { pos: { x: 24, y: 9 }, dir: BOTTOM_LEFT, actions: ['transferBob'] },  // Bob at (24,8)
     { pos: { x: 23, y: 10 }, dir: BOTTOM_LEFT },
-    { pos: { x: 22, y: 11 }, dir: BOTTOM_LEFT },
+    { pos: { x: 22, y: 11 }, dir: BOTTOM_LEFT, actions: ['transferBob'] },  // Bob at (22,12)
     { pos: { x: 21, y: 12 }, dir: BOTTOM_LEFT },
     { pos: { x: 20, y: 13 }, dir: BOTTOM_LEFT },
     { pos: { x: 19, y: 14 }, dir: BOTTOM_LEFT },
     { pos: { x: 18, y: 15 }, dir: BOTTOM_LEFT },
-    { pos: { x: 17, y: 16 }, dir: LEFT },
+    { pos: { x: 17, y: 16 }, dir: LEFT, actions: ['transferBob'] },  // Bob at (17,15)
     { pos: { x: 16, y: 16 }, dir: LEFT },
-    { pos: { x: 15, y: 16 }, dir: LEFT, actions: ['transferSpawn'] },  // Transfer to spawn, then LEFT to (14,16) which is step 0
+    { pos: { x: 15, y: 16 }, dir: LEFT, actions: ['transferSpawn'] },
 ];
 
 // Tucker's actions

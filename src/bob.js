@@ -1,13 +1,12 @@
 /**
  * Bob - Builder
- * Walks the road, steps off to build stations, builds construction sites.
- * Stays off roads when building to not block truckers.
+ * Walks his own rail (off-road) between build stations.
+ * Waits at each station until all sites within range 3 are complete.
  *
- * Build Stations (off-road positions):
- *   Station 1: (14,17) - covers spawn area roads
- *   Station 2: (19,13) - covers diagonal section
- *   Station 3: (24,10) - covers source area
- *   Station 4: (22,5)  - covers controller area
+ * Build Stations:
+ *   Station 0: (17,15) - south of road
+ *   Station 1: (22,12) - south of road
+ *   Station 2: (24,8)  - near source/controller
  *
  * Room: E48S56
  */
@@ -17,96 +16,89 @@ const { buildBody } = require('util');
 const conf = {
     name: 'Bob',
     idealBody: [WORK, CARRY, MOVE, WORK, CARRY, MOVE, WORK, WORK],
-    minEnergy: 200,  // WORK + CARRY + MOVE minimum
+    minEnergy: 200,
     spawn: 'Spawn1',
-    spawnDirection: BOTTOM,  // Spawn onto road at (14, 16)
+    spawnDirection: RIGHT,  // Spawn to (15, 15)
 };
 
-// Bob's route with build stations
+// Stations - Bob builds everything within range 3 of each
+const STATIONS = [
+    { pos: { x: 17, y: 15 } },
+    { pos: { x: 22, y: 12 } },
+    { pos: { x: 24, y: 8 } },
+];
+
+// Bob's rail
 const routine = [
-    // Start on road, go to Station 1
-    { pos: { x: 14, y: 16 }, dir: BOTTOM },
-    { pos: { x: 14, y: 17 }, dir: TOP, actions: ['build'] },  // Station 1
+    // Spawn entry
+    { pos: { x: 15, y: 15 }, dir: RIGHT },
+    { pos: { x: 16, y: 15 }, dir: RIGHT },
 
-    // Back on road, walk to Station 2
-    { pos: { x: 14, y: 16 }, dir: RIGHT },
-    { pos: { x: 15, y: 16 }, dir: RIGHT },
-    { pos: { x: 16, y: 16 }, dir: RIGHT },
-    { pos: { x: 17, y: 16 }, dir: TOP_RIGHT },
-    { pos: { x: 18, y: 15 }, dir: TOP_RIGHT },
-    { pos: { x: 19, y: 14 }, dir: BOTTOM },  // Step off road
-    { pos: { x: 19, y: 13 }, dir: TOP, actions: ['build'] },  // Station 2
+    // Station 0
+    { pos: { x: 17, y: 15 }, dir: BOTTOM_RIGHT, station: 0 },
 
-    // Back on road, walk to Station 3
-    { pos: { x: 19, y: 14 }, dir: TOP_RIGHT },
-    { pos: { x: 20, y: 13 }, dir: TOP_RIGHT },
-    { pos: { x: 21, y: 12 }, dir: TOP_RIGHT },
-    { pos: { x: 22, y: 11 }, dir: TOP_RIGHT },
-    { pos: { x: 23, y: 10 }, dir: BOTTOM },  // Step off road
-    { pos: { x: 23, y: 9 }, dir: TOP, actions: ['build'] },  // Station 3 (adjusted to 23,9)
+    // Hop road south, walk to Station 1
+    { pos: { x: 18, y: 16 }, dir: TOP_RIGHT },
+    { pos: { x: 19, y: 15 }, dir: TOP_RIGHT },
+    { pos: { x: 20, y: 14 }, dir: TOP_RIGHT },
+    { pos: { x: 21, y: 13 }, dir: TOP_RIGHT },
 
-    // Back on road, walk to Station 4
-    { pos: { x: 23, y: 10 }, dir: TOP_RIGHT },
-    { pos: { x: 24, y: 9 }, dir: RIGHT },
-    { pos: { x: 25, y: 9 }, dir: TOP },
-    { pos: { x: 25, y: 8 }, dir: TOP_LEFT },
-    { pos: { x: 24, y: 7 }, dir: TOP_LEFT },
-    { pos: { x: 23, y: 6 }, dir: TOP_LEFT },  // Step off road
-    { pos: { x: 22, y: 5 }, dir: BOTTOM_RIGHT, actions: ['build'] },  // Station 4
+    // Station 1
+    { pos: { x: 22, y: 12 }, dir: TOP_LEFT, station: 1 },
 
-    // Return journey
-    { pos: { x: 23, y: 6 }, dir: BOTTOM_RIGHT },
-    { pos: { x: 24, y: 7 }, dir: BOTTOM_RIGHT },
-    { pos: { x: 25, y: 8 }, dir: BOTTOM },
-    { pos: { x: 25, y: 9 }, dir: LEFT },
-    { pos: { x: 24, y: 9 }, dir: BOTTOM_LEFT },
-    { pos: { x: 23, y: 10 }, dir: BOTTOM_LEFT },
-    { pos: { x: 22, y: 11 }, dir: BOTTOM_LEFT },
-    { pos: { x: 21, y: 12 }, dir: BOTTOM_LEFT },
-    { pos: { x: 20, y: 13 }, dir: BOTTOM_LEFT },
-    { pos: { x: 19, y: 14 }, dir: BOTTOM_LEFT },
-    { pos: { x: 18, y: 15 }, dir: BOTTOM_LEFT },
-    { pos: { x: 17, y: 16 }, dir: LEFT },
-    { pos: { x: 16, y: 16 }, dir: LEFT },
-    { pos: { x: 15, y: 16 }, dir: LEFT },
-    // Loops back to (14,16) at step 0
+    // Hop road north, walk to Station 2
+    { pos: { x: 21, y: 11 }, dir: TOP_RIGHT },
+    { pos: { x: 22, y: 10 }, dir: TOP_RIGHT },
+    { pos: { x: 23, y: 9 }, dir: TOP_RIGHT },
+
+    // Station 2
+    { pos: { x: 24, y: 8 }, dir: BOTTOM_LEFT, station: 2 },
+
+    // Return to spawn area
+    { pos: { x: 23, y: 9 }, dir: BOTTOM_LEFT },
+    { pos: { x: 22, y: 10 }, dir: BOTTOM_LEFT },
+    { pos: { x: 21, y: 11 }, dir: BOTTOM_LEFT },
+    { pos: { x: 20, y: 12 }, dir: BOTTOM_LEFT },
+    { pos: { x: 19, y: 13 }, dir: BOTTOM_LEFT },
+    { pos: { x: 18, y: 14 }, dir: BOTTOM_LEFT },
+    { pos: { x: 17, y: 15 }, dir: LEFT },
+    { pos: { x: 16, y: 15 }, dir: LEFT },
+    // loops back to (15, 15) at step 0
 ];
 
-// Build stations for trucker transfers
-const BUILD_STATIONS = [
-    { x: 14, y: 17 },
-    { x: 19, y: 13 },
-    { x: 23, y: 9 },
-    { x: 22, y: 5 },
-];
+// Check if any construction sites within range 3 of station
+function stationHasWork(room, stationIndex) {
+    const station = STATIONS[stationIndex];
+    const sites = room.find(FIND_CONSTRUCTION_SITES);
+    return sites.some(s =>
+        Math.max(Math.abs(s.pos.x - station.pos.x), Math.abs(s.pos.y - station.pos.y)) <= 3
+    );
+}
 
-const actions = {
-    build(creep) {
-        if (creep.isEmpty) return;
+// Build nearest site within range 3
+function buildAtStation(creep) {
+    if (creep.isEmpty) return;
 
-        // Find nearest construction site within range 3
-        const sites = creep.room.find(FIND_CONSTRUCTION_SITES);
-        const inRange = sites.filter(s =>
-            Math.max(Math.abs(s.pos.x - creep.pos.x), Math.abs(s.pos.y - creep.pos.y)) <= 3
-        );
+    const sites = creep.room.find(FIND_CONSTRUCTION_SITES);
+    const inRange = sites.filter(s =>
+        Math.max(Math.abs(s.pos.x - creep.pos.x), Math.abs(s.pos.y - creep.pos.y)) <= 3
+    );
 
-        if (inRange.length === 0) return;
+    if (inRange.length === 0) return;
 
-        // Build the closest one
-        const target = inRange.reduce((a, b) =>
-            creep.pos.getRangeTo(a) < creep.pos.getRangeTo(b) ? a : b
-        );
+    const target = inRange.reduce((a, b) =>
+        creep.pos.getRangeTo(a) < creep.pos.getRangeTo(b) ? a : b
+    );
 
-        return creep.build(target);
-    },
-};
+    return creep.build(target);
+}
 
 function spawn() {
     const s = Game.spawns[conf.spawn];
     if (!s || s.spawning) return false;
     if (Game.creeps[conf.name]) return false;
 
-    // Only spawn if there are construction sites to build
+    // Only spawn if there are construction sites
     const sites = s.room.find(FIND_CONSTRUCTION_SITES);
     if (sites.length === 0) return false;
 
@@ -136,7 +128,6 @@ function run() {
 
     if (creep.spawning) return;
 
-    // Initialize step
     if (creep.memory.step === undefined) creep.memory.step = 0;
 
     let step = creep.memory.step;
@@ -147,7 +138,6 @@ function run() {
         step = (step - 1 + routine.length) % routine.length;
         creep.memory.step = step;
 
-        // Sanity check
         const here = routine[step];
         if (creep.pos.x !== here.pos.x || creep.pos.y !== here.pos.y) {
             console.log(`${conf.name} OFF RAILS! At (${creep.pos.x},${creep.pos.y}), expected (${here.pos.x},${here.pos.y}) step=${step}`);
@@ -156,15 +146,16 @@ function run() {
 
     const here = routine[step];
 
-    // Execute actions if defined for this tile
-    if (here.actions) {
-        for (const actionName of here.actions) {
-            const result = actions[actionName](creep);
-            if (result === OK) break;
+    // At a build station - build and wait if work remains
+    if (here.station !== undefined) {
+        buildAtStation(creep);
+
+        if (stationHasWork(creep.room, here.station)) {
+            return;  // Wait at station
         }
     }
 
-    // Move to next position if direction specified
+    // Move to next position
     if (creep.fatigue > 0) return;
     if (here.dir) {
         creep.move(here.dir);
@@ -172,4 +163,4 @@ function run() {
     }
 }
 
-module.exports = { run, BUILD_STATIONS };
+module.exports = { run, STATIONS };

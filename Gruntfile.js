@@ -9,7 +9,6 @@ module.exports = function(grunt) {
   var email = grunt.option('email') || config.email;
   var token = grunt.option('token') || config.token;
   var ptr = grunt.option('ptr') ? true : config.ptr;
-  var private_directory = grunt.option('private_directory') || config.private_directory;
 
   var currentdate = new Date();
   grunt.log.subhead('Task Start: ' + currentdate.toLocaleString());
@@ -23,15 +22,30 @@ module.exports = function(grunt) {
 
   grunt.initConfig({
 
-    // Push all files in the dist folder to screeps
+    // Push files to screeps servers
     screeps: {
-      options: {
-        email: email,
-        token: token,
-        branch: branch,
-        ptr: ptr
+      // Live server (official)
+      live: {
+        options: {
+          email: email,
+          token: token,
+          branch: branch,
+          ptr: ptr
+        },
+        src: ['dist/*.js']
       },
-      dist: {
+      // Local private server
+      local: {
+        options: {
+          server: {
+            host: config.local.host,
+            port: config.local.port,
+            http: true
+          },
+          email: config.local.email,
+          password: config.local.password,
+          branch: branch
+        },
         src: ['dist/*.js']
       }
     },
@@ -71,6 +85,9 @@ module.exports = function(grunt) {
 
   });
 
-  // Default task: clean, copy, version, deploy
-  grunt.registerTask('default', ['clean', 'copy:screeps', 'file_append:versioning', 'screeps']);
+  // Default task: deploy to live server
+  grunt.registerTask('default', ['clean', 'copy:screeps', 'file_append:versioning', 'screeps:live']);
+
+  // Local task: deploy to private server
+  grunt.registerTask('local', ['clean', 'copy:screeps', 'file_append:versioning', 'screeps:local']);
 };

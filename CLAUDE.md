@@ -4,8 +4,34 @@ Room E48S56 on shard3.
 
 ## Deploy
 ```bash
-grunt --branch=E48S56_1    # deploy to current branch
+# Live server (official)
+grunt --branch=E48S56_1    # deploy to branch on live server
 grunt --branch=default     # deploy to different branch
+
+# Local private server
+grunt local                 # deploy to local server (default branch)
+grunt local --branch=test   # deploy to local server (specific branch)
+```
+
+## Private Server Setup
+```bash
+npm install screeps
+npx screeps init           # creates server in current dir
+npx screeps start          # starts server on port 21025
+```
+
+Connect via Steam client or Screeps client to `localhost:21025`.
+
+Configure local server credentials in `.screeps.json`:
+```json
+{
+  "local": {
+    "host": "localhost",
+    "port": 21025,
+    "email": "admin",
+    "password": "admin"
+  }
+}
 ```
 
 ## Design Philosophy
