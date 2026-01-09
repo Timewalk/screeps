@@ -1,6 +1,8 @@
 require('prototypes');  // Load prototype extensions first
 const Sam = require('sam');
 const Hugo = require('hugo');
+const Tucker = require('tucker');
+const Uma = require('uma');
 
 module.exports.loop = function() {
     // Clean up dead creep memory
@@ -13,4 +15,6 @@ module.exports.loop = function() {
 
     Sam.run();
     Hugo.run();
+    Tucker.run();
+    Uma.run();
 };

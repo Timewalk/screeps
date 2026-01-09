@@ -202,8 +202,8 @@ def render_room(room: str, shard: str = 'shard3',
     if save_path:
         plt.savefig(save_path, dpi=150, facecolor='#1a1a1a')
         print(f"Saved to {save_path}")
-
-    plt.show()
+    else:
+        plt.show()
 
 def main():
     parser = argparse.ArgumentParser(description='Render Screeps room terrain')
