@@ -2,6 +2,7 @@ require('prototypes');  // Load prototype extensions first
 const Sam = require('sam');
 const Hugo = require('hugo');
 const Tucker = require('tucker');
+const Travis = require('travis');
 const Uma = require('uma');
 
 module.exports.loop = function() {
@@ -16,5 +17,6 @@ module.exports.loop = function() {
     Sam.run();
     Hugo.run();
     Tucker.run();
+    Travis.run();  // Spawns when Tucker is at halfway point
     Uma.run();
 };

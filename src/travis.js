@@ -1,11 +1,10 @@
 /**
- * Tucker - Hauler/Trucker
- * Hauls energy along the full road from spawn to controller area.
- * Services: Hugo (26,9), future upgraders at (25,7) and (24,6)
+ * Travis - Second Hauler/Trucker
+ * Same route as Tucker, but spawns 180 degrees out of phase.
+ * Spawns when Tucker is at step 13 (halfway point) to maintain offset.
  *
  * Room: E48S56
- * Spawn: (14, 15)
- * Route: (14, 16) <-> (23, 6) full road round trip
+ * Route: Same as Tucker - (14, 16) <-> (23, 6) full road round trip
  */
 
 const { buildBody } = require('util');
@@ -13,18 +12,18 @@ const { buildBody } = require('util');
 const ROUTE_LENGTH = 27;
 
 const conf = {
-    name: 'Tucker',
-    phase: 0,  // Spawn when Game.time % ROUTE_LENGTH === phase
+    name: 'Travis',
+    phase: 13,  // Spawn when Game.time % ROUTE_LENGTH === phase (180° offset from Tucker)
     idealBody: [CARRY, MOVE, CARRY, MOVE, CARRY, MOVE, CARRY, MOVE, CARRY, MOVE],
     minEnergy: 100,
     spawn: 'Spawn1',
     spawnDirection: BOTTOM,
 };
 
-// Tucker's route - full road round trip
+// Same routine as Tucker - shared constant would be cleaner but this works
 const routine = [
     // Outbound: spawn area -> controller area
-    { pos: { x: 14, y: 16 }, dir: RIGHT, actions: ['pickupSam'] },  // Sam drops at (13,15)
+    { pos: { x: 14, y: 16 }, dir: RIGHT, actions: ['pickupSam'] },
     { pos: { x: 15, y: 16 }, dir: RIGHT },
     { pos: { x: 16, y: 16 }, dir: RIGHT },
     { pos: { x: 17, y: 16 }, dir: TOP_RIGHT },
@@ -35,15 +34,15 @@ const routine = [
     { pos: { x: 22, y: 11 }, dir: TOP_RIGHT },
     { pos: { x: 23, y: 10 }, dir: TOP_RIGHT },
     { pos: { x: 24, y: 9 }, dir: RIGHT },
-    { pos: { x: 25, y: 9 }, dir: TOP, actions: ['pickupHugo'] },  // Hugo drops at (26,9)
+    { pos: { x: 25, y: 9 }, dir: TOP, actions: ['pickupHugo'] },
     { pos: { x: 25, y: 8 }, dir: TOP_LEFT },
-    { pos: { x: 24, y: 7 }, dir: TOP_LEFT },
-    { pos: { x: 23, y: 6 }, dir: BOTTOM_RIGHT, actions: ['transferUma'] },  // Uma at (24,5) adjacent
+    { pos: { x: 24, y: 7 }, dir: TOP_LEFT },                          // Step 13 - halfway
+    { pos: { x: 23, y: 6 }, dir: BOTTOM_RIGHT, actions: ['transferUma'] },
 
     // Return: back to spawn
     { pos: { x: 24, y: 7 }, dir: BOTTOM_RIGHT },
     { pos: { x: 25, y: 8 }, dir: BOTTOM },
-    { pos: { x: 25, y: 9 }, dir: LEFT, actions: ['pickupHugo'] },  // Pickup again on way back
+    { pos: { x: 25, y: 9 }, dir: LEFT, actions: ['pickupHugo'] },
     { pos: { x: 24, y: 9 }, dir: BOTTOM_LEFT },
     { pos: { x: 23, y: 10 }, dir: BOTTOM_LEFT },
     { pos: { x: 22, y: 11 }, dir: BOTTOM_LEFT },
@@ -53,10 +52,9 @@ const routine = [
     { pos: { x: 18, y: 15 }, dir: BOTTOM_LEFT },
     { pos: { x: 17, y: 16 }, dir: LEFT },
     { pos: { x: 16, y: 16 }, dir: LEFT },
-    { pos: { x: 15, y: 16 }, dir: LEFT, actions: ['transferSpawn'] },  // Transfer to spawn, then LEFT to (14,16) which is step 0
+    { pos: { x: 15, y: 16 }, dir: LEFT, actions: ['transferSpawn'] },
 ];
 
-// Tucker's actions
 const actions = {
     pickupHugo(creep) {
         if (!creep.notFull) return;
@@ -99,7 +97,7 @@ function spawn() {
     });
 
     if (result === OK) {
-        console.log(`Spawning ${conf.name} with body: ${body}`);
+        console.log(`Spawning ${conf.name} with body: ${body} (phase ${conf.phase})`);
     }
     return result === OK;
 }
@@ -125,7 +123,7 @@ function run() {
         step = (step - 1 + routine.length) % routine.length;
         creep.memory.step = step;
 
-        // Sanity check - if still wrong, we're off rails entirely
+        // Sanity check - if still wrong, we're off rails
         const here = routine[step];
         if (creep.pos.x !== here.pos.x || creep.pos.y !== here.pos.y) {
             console.log(`${conf.name} OFF RAILS! At (${creep.pos.x},${creep.pos.y}), expected (${here.pos.x},${here.pos.y}) step=${step}`);
