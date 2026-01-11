@@ -1,197 +1,153 @@
 # ClaudeBot
 
-Room E48S56 on shard3.
+Room E42S48 on shard3.
 
 ## Deploy
 ```bash
-# Live server (official)
-grunt --branch=E48S56_1    # deploy to branch on live server
-grunt --branch=default     # deploy to different branch
-
-# Local private server
-grunt local                 # deploy to local server (default branch)
-grunt local --branch=test   # deploy to local server (specific branch)
-```
-
-## Private Server Setup
-```bash
-npm install screeps
-npx screeps init           # creates server in current dir
-npx screeps start          # starts server on port 21025
-```
-
-Connect via Steam client or Screeps client to `localhost:21025`.
-
-Configure local server credentials in `.screeps.json`:
-```json
-{
-  "local": {
-    "host": "localhost",
-    "port": 21025,
-    "email": "admin",
-    "password": "admin"
-  }
-}
+grunt --branch=world    # deploy to live server
 ```
 
 ## Design Philosophy
 
-**"Efficiency through simplicity"**
+**Colony-Centric, Not Room-Centric**
 
-Trade operational efficiency for logical consistency and structural predictability. A "dumb" factory that runs without thinking beats a "smart" system with complex decision logic. Minimize CPU cost by eliminating pathfinding, searching, and conditional logic at runtime.
+The colony is the unit of organization, not the room. A source is a source regardless of which room it's in. "Remote" and "local" are not categories - distance is a parameter that affects body composition and logistics, not fundamentally different roles.
 
-## Creep Design: Rails System
+**Current State:** Room-centric with `role.remoteHarvester.js` as a special case.
 
-Creeps run on **hardcoded rails** - explicit scripts that define exactly what happens on every tile, every tick. Zero runtime decisions.
+**Target State:** Unified roles that work on any source, anywhere. Configuration lists sources by ID, not by room.
 
-### Module Structure
+### Design Principles
 
-Each creep type is its own module with:
-- `conf` - configuration (name, body, spawn settings, target IDs)
-- `routine` - array of positions/directions/actions
-- `actions` - module-specific methods with conditions baked in
-- `spawn()` - spawning logic
-- `run()` - main loop
+1. **No "remote" vs "local" distinction** - distance is a number, not a type
+2. **Sources drive behavior** - each source needs a harvester, maybe a hauler
+3. **Controllers drive behavior** - each controller needs upgraders
+4. **Spawns are shared resources** - SpawnManager prioritizes across all needs
+5. **Keep it simple** - functions and data, minimize OOP
 
-```javascript
-// Example: hugo.js
-const conf = {
-    name: 'Hugo',
-    idealBody: [WORK, MOVE, WORK, WORK, WORK, WORK],
-    minEnergy: 250,
-    spawn: 'Spawn1',
-    spawnDirection: RIGHT,
-    sourceId: '5bbcafe99099fc012e63b601',
-};
+### Planned Architecture
 
-const routine = [
-    { pos: { x: 15, y: 15 }, dir: BOTTOM },
-    { pos: { x: 15, y: 16 }, dir: RIGHT },
-    // ... more steps
-    { pos: { x: 26, y: 9 }, dir: null, actions: ['harvest'] },
-];
-
-const actions = {
-    harvest(creep) {
-        return creep.harvest(Game.getObjectById(conf.sourceId));
-    }
-};
+```
+config.js           ← source IDs, controller IDs (no room distinctions)
+manager.source.js   ← iterates sources, requests creeps based on need
+manager.spawn.js    ← priority queue, finds available spawn
+role.harvester.js   ← works on ANY source (travels if needed)
+role.hauler.js      ← works on ANY source→destination route
+role.upgrader.js    ← works on ANY controller
+role.builder.js     ← works on ANY construction site
 ```
 
-### Naming Convention
+---
 
-Creeps get **creative names** starting with their role letter:
-- **S** - Spawn harvesters (Sam) - feed the spawn directly
-- **H** - Harvesters (Hugo, Hank) - pure harvesters at sources
-- **T** - Transporters/Haulers (Tucker) - move energy around
-- **U** - Upgraders - upgrade controller
-- **B** - Builders - build construction sites
+**Legacy Pattern (being phased out)**
 
-### Body Scaling
+Static harvesters + haulers + role-based creeps with room-centric assumptions.
 
-Bodies scale to room energy capacity using `buildBody()` from `util.js`:
+## Architecture
 
-```javascript
-const { buildBody } = require('util');
+### Roles
 
-// Ideal body in PRIORITY ORDER - essential parts first
-const idealBody = [WORK, MOVE, WORK, WORK, WORK, WORK];
+| Role | File | Purpose | Status |
+|------|------|---------|--------|
+| harvester | role.harvester.js | Static miner - walks to source, parks, harvests forever | Refactor to handle any source |
+| hauler | role.hauler.js | Picks up energy, delivers to spawn/extensions/towers | Refactor to handle any route |
+| upgrader | role.upgrader.js | Gets energy, upgrades controller | OK |
+| builder | role.builder.js | Gets energy, builds sites (or repairs/upgrades as fallback) | OK |
+| remoteHarvester | role.remoteHarvester.js | Harvester for non-owned rooms | **DEPRECATED** - merge into harvester |
+| remoteHauler | role.remoteHauler.js | Hauler for non-owned rooms | **DEPRECATED** - merge into hauler |
 
-// Build what we can afford
-const body = buildBody(idealBody, room.energyCapacityAvailable);
-// With 300 energy: [WORK, MOVE, WORK] (250 cost)
-// With 550 energy: [WORK, MOVE, WORK, WORK, WORK, WORK] (full)
-```
+### Key Files
 
-Each creep defines `minEnergy` - don't spawn if room has less (e.g., 250 for a useful harvester with 2 WORK).
+- `main.js` - Main loop, runs spawn manager and all creep roles
+- `config.js` - Colony configuration (sources, controllers) **NEW**
+- `spawn.js` - Population management, spawns creeps based on need
+- `prototypes.js` - Creep prototype extensions (isFull, isEmpty, etc.)
+- `util.js` - Utilities (buildBody)
 
-### Routine Structure
+### Creep Behavior
 
-```javascript
-routine = [
-  {
-    pos: {x, y},           // tile position
-    dir: DIRECTION,        // direction to move to NEXT tile (null if destination)
-    actions: ['action1', 'action2']  // action method names (only on destination tiles)
-  },
-]
-```
+**Harvesters** (static miners):
+1. Walk to assigned source (uses `moveTo` once)
+2. Set `memory.inPosition = true`
+3. Harvest forever (no more pathfinding)
 
-Actions are string names that map to methods in the module's `actions` object. Conditions are baked into each method:
-
-```javascript
-const actions = {
-    harvest(creep) {
-        if (!creep.notFull) return;  // condition baked in
-        return creep.harvest(Game.getObjectById(conf.sourceId));
-    },
-    transfer(creep) {
-        if (!creep.isFull) return;
-        return creep.transfer(Game.getObjectById(conf.spawnId), RESOURCE_ENERGY);
-    },
-    drop(creep) {
-        if (!creep.isFull) return;
-        return creep.drop(RESOURCE_ENERGY);
-    }
-};
-```
+**Haulers/Upgraders/Builders**:
+1. State machine: collecting vs delivering/working
+2. Find closest target using `findClosestByPath`
+3. Use `moveTo` with `reusePath: 20-50` for efficiency
 
 ### Prototype Extensions
 
-Custom properties on `Creep.prototype` (defined in `prototypes.js`):
-- `creep.isFull` - no free capacity
-- `creep.isEmpty` - zero energy
-- `creep.notFull` - has free capacity
-- `creep.notEmpty` - has some energy
-- `creep.energyRatio` - percentage full (0 to 1)
-
-### Execution Logic
-
-Each tick:
-1. **Verify position** - Am I at `routine[step].pos`?
-   - **NO** → Move failed last tick. Decrement step.
-2. **Execute actions** - Try each action method until one returns OK
-3. **Check fatigue** - Skip movement if fatigued (but actions still run!)
-4. **Move** in `routine[step].dir` direction
-5. **Increment step** (optimistic)
-
-### Spawn Conventions
-
-- `spawnDirection` - spawn creeps away from traffic paths
-- Check `room.energyAvailable >= conf.minEnergy` before spawning
-- Use `room.energyCapacityAvailable` for body scaling (not current energy)
-
-### Memory
-
-Creep only stores one integer:
 ```javascript
-creep.memory.step = 0  // current routine index
+creep.isFull     // no free capacity
+creep.isEmpty    // zero energy
+creep.notFull    // has free capacity
+creep.notEmpty   // has some energy
+creep.energyRatio // percentage full (0 to 1)
 ```
 
-## Room Layout: E48S56
+### Body Scaling
+
+Bodies scale to room energy using `buildBody()`:
+
+```javascript
+const { buildBody } = require('util');
+const body = buildBody(idealBody, room.energyCapacityAvailable);
+```
+
+### Spawn Priority
+
+1. Harvesters (need energy income)
+2. Haulers (move energy to spawn)
+3. Upgraders (level up)
+4. Builders (only if construction sites exist)
+
+### Population Targets
+
+Configured in `spawn.js`:
+- 2 harvesters (one per source)
+- 2 haulers
+- 2 upgraders
+- 1 builder (when needed)
+
+## Room Layout: E42S48
 
 ```
-Spawn: (14, 15)
-West Source: (13, 16) - Sam harvests from (13, 15)
-East Source: (27, 8) - Hugo harvests from (26, 9)
-Controller: (27, 5)
+Spawn: (25, 18)
+Source 1: (24, 13)  ← sources are adjacent!
+Source 2: (25, 13)
+Controller: (19, 27)
+Mineral: (6, 9) - Hydrogen
 ```
+
+## Source Registry
+
+All sources managed by the colony. Defined in `config.js`.
+
+| Room | Source ID | Position | Notes |
+|------|-----------|----------|-------|
+| E42S48 | `5bbcaf7b9099fc012e63aa73` | (24, 13) | Adjacent to other source |
+| E42S48 | `5bbcaf7b9099fc012e63aa72` | (25, 13) | Adjacent to other source |
+| E42S47 | `5bbcaf7b9099fc012e63aa74` | (22, 28) | Near south edge |
+
+### Future Sources
+
+| Room | Position | Notes |
+|------|----------|-------|
+| E43S48 | (5, 15) | Near west edge |
+| E42S49 | (31, 16) | |
+| E41S48 | (41, 4) | Corner |
 
 ## Tools
 
 - `tools/room_render.py` - Render room terrain and structures
   ```bash
-  python tools/room_render.py E48S56 --json docs/E48S56_room.json --fetch --save room.png
+  python tools/room_render.py E42S48 --json docs/E42S48_room.json --fetch --save room.png
   ```
-  - `--fetch` pulls live objects (roads, creeps, construction sites) from API
-  - `--json` overlays structures from local JSON file
 
-- `docs/E48S56_room.json` - Room data (terrain, structures, planned routes)
-
-## Files
-
-- `src/main.js` - Main loop, loads all creep modules
-- `src/prototypes.js` - Creep prototype extensions
-- `src/util.js` - Utilities (buildBody)
-- `src/sam.js` - Spawn harvester
-- `src/hugo.js` - East source harvester
+- `tools/economy_calc.py` - Economy calculator (production vs consumption)
+  ```bash
+  python tools/economy_calc.py E42S48           # summary view
+  python tools/economy_calc.py E42S48 -v        # verbose (per-creep details)
+  ```
+  Shows: energy allocation, spawn overhead, structure maintenance, upgrader utilization

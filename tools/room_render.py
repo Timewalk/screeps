@@ -77,7 +77,7 @@ def parse_terrain(terrain_str: str) -> np.ndarray:
 
 def render_room(room: str, shard: str = 'shard3',
                 structures: dict = None, save_path: str = None,
-                fetch_objects: bool = False):
+                fetch_objects: bool = False, show_plan: bool = False):
     """Render room terrain with optional structures overlay."""
 
     # Fetch and parse terrain
@@ -167,6 +167,53 @@ def render_room(room: str, shard: str = 'shard3',
                 if name:
                     ax.annotate(name, (x + 0.5, y - 0.3), color='lime',
                                fontsize=7, ha='center')
+            elif obj_type == 'spawn':
+                ax.plot(x + 0.5, y + 0.5, 'o', color='#f04040', markersize=15)
+                ax.annotate(obj.get('name', 'Spawn'), (x + 0.5, y - 0.8),
+                           color='white', fontsize=8, ha='center')
+            elif obj_type == 'source':
+                ax.plot(x + 0.5, y + 0.5, 'o', color='#ffff00', markersize=12)
+            elif obj_type == 'controller':
+                ax.plot(x + 0.5, y + 0.5, 'D', color='#ffffff', markersize=12)
+            elif obj_type == 'mineral':
+                mineral_type = obj.get('mineralType', '?')
+                ax.plot(x + 0.5, y + 0.5, 'h', color='#00ffff', markersize=10)
+                ax.annotate(mineral_type, (x + 0.5, y + 1.5),
+                           color='cyan', fontsize=7, ha='center')
+            elif obj_type == 'tower':
+                ax.plot(x + 0.5, y + 0.5, '^', color='#ff6600', markersize=12)
+
+    # Show extension plan if requested
+    if show_plan:
+        # E42S48 specific plan
+        rcl2_ext = [(24,19), (25,19), (26,19), (24,20), (25,20)]
+        rcl3_ext = [(26,20), (27,19), (27,20), (24,21), (25,21)]
+        rcl4_ext = [(26,21), (27,21), (23,19), (23,20), (23,21),
+                    (28,19), (28,20), (24,22), (25,22), (26,22)]
+        tower_pos = (25, 17)
+
+        # RCL 2 extensions - red
+        for x, y in rcl2_ext:
+            ax.plot(x + 0.5, y + 0.5, 'o', color='#ff4444', markersize=10,
+                   markeredgecolor='white', markeredgewidth=2, alpha=0.8)
+        ax.plot([], [], 'o', color='#ff4444', markersize=10, label='RCL 2 Ext (5)')
+
+        # RCL 3 extensions - yellow
+        for x, y in rcl3_ext:
+            ax.plot(x + 0.5, y + 0.5, 'o', color='#ffff00', markersize=10,
+                   markeredgecolor='white', markeredgewidth=2, alpha=0.8)
+        ax.plot([], [], 'o', color='#ffff00', markersize=10, label='RCL 3 Ext (+5)')
+
+        # RCL 4 extensions - blue
+        for x, y in rcl4_ext:
+            ax.plot(x + 0.5, y + 0.5, 'o', color='#4488ff', markersize=10,
+                   markeredgecolor='white', markeredgewidth=2, alpha=0.8)
+        ax.plot([], [], 'o', color='#4488ff', markersize=10, label='RCL 4 Ext (+10)')
+
+        # Tower - orange triangle
+        ax.plot(tower_pos[0] + 0.5, tower_pos[1] + 0.5, '^', color='#ff6600',
+               markersize=14, markeredgecolor='white', markeredgewidth=2)
+        ax.plot([], [], '^', color='#ff6600', markersize=12, label='Tower (RCL 3)')
 
     # Grid lines
     ax.set_xticks(range(0, 51, 5))
@@ -194,8 +241,11 @@ def render_room(room: str, shard: str = 'shard3',
         mpatches.Patch(facecolor=COLORS[WALL], label='Wall'),
         mpatches.Patch(facecolor=COLORS[SWAMP], label='Swamp'),
     ]
-    ax.legend(handles=legend_elements, loc='upper right',
-             facecolor='#333333', labelcolor='white')
+    if show_plan:
+        ax.legend(loc='upper left', facecolor='#333333', labelcolor='white', fontsize=9)
+    else:
+        ax.legend(handles=legend_elements, loc='upper right',
+                 facecolor='#333333', labelcolor='white')
 
     plt.tight_layout()
 
@@ -207,12 +257,14 @@ def render_room(room: str, shard: str = 'shard3',
 
 def main():
     parser = argparse.ArgumentParser(description='Render Screeps room terrain')
-    parser.add_argument('room', help='Room name (e.g., E48S56)')
+    parser.add_argument('room', help='Room name (e.g., E42S48)')
     parser.add_argument('--shard', default='shard3', help='Shard name')
     parser.add_argument('--json', help='Path to room JSON with structures')
     parser.add_argument('--save', help='Save image to path')
     parser.add_argument('--fetch', action='store_true',
                        help='Fetch room objects from API (requires .screeps.json)')
+    parser.add_argument('--plan', action='store_true',
+                       help='Show extension placement plan for E42S48')
 
     args = parser.parse_args()
 
@@ -221,7 +273,7 @@ def main():
         with open(args.json) as f:
             structures = json.load(f)
 
-    render_room(args.room, args.shard, structures, args.save, args.fetch)
+    render_room(args.room, args.shard, structures, args.save, args.fetch, args.plan)
 
 if __name__ == '__main__':
     main()

@@ -21,10 +21,6 @@ const BODY_COSTS = {
  * @param {Array} ideal - Ideal body in priority order
  * @param {number} energy - Available energy
  * @returns {Array} - Body array with as many parts as energy allows
- *
- * Example:
- *   buildBody([WORK, MOVE, WORK, WORK, WORK, WORK], 300)
- *   => [WORK, MOVE, WORK] (100 + 50 + 100 = 250, next WORK would be 350)
  */
 function buildBody(ideal, energy) {
     const body = [];
